@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 gym = {extras = ["box2d"],version = "*"}
 tensorflow = "*"
+numpy = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"

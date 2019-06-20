@@ -1,10 +1,14 @@
 #!/usr/env/bin python3
 import argparse
 
+import tensorflow as tf
+tf.enable_eager_execution()
+
 import gym
 
-from agents import RandomAgent
+from agents import RandomAgent, NetworkAgent
 from engine import Engine
+from networks import FeedForwardNetwork
 
 
 engine = Engine(
@@ -13,6 +17,7 @@ engine = Engine(
   env_name = 'CartPole-v0',
 )
 
-agent = RandomAgent(engine.env)
+agent = NetworkAgent(engine.env, FeedForwardNetwork([20, 30]))
+# agent = RandomAgent(engine.env)
 
 engine.rollout(agent)
