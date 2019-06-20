@@ -9,15 +9,17 @@ class Engine:
     
   def rollout(self, agent):
     for i_episode in range(self.num_episodes):
-        observation = self.env.reset()
-        for t in range(self.num_steps_per_episode):
-            self.render_env()
+      agent.episode_started()
+      observation = self.env.reset()
+      for t in range(self.num_steps_per_episode):
+          self.render_env()
 
-            observation, done = self.step_env(agent, observation)
+          observation, done = self.step_env(agent, observation)
 
-            if done:
-                print("Episode finished after {} timesteps".format(t+1))
-                break
+          if done:
+              print("Episode finished after {} timesteps".format(t+1))
+              break
+      agent.episode_ended()
 
     self.env.close()
 
