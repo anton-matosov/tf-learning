@@ -12,14 +12,23 @@ class Network():
     pass
 
   def configure(self, observation_shape, action_shape, output_activation = tf.nn.softmax):
-    if isinstance(action_shape, gym.spaces.Discrete):
-      num_output_neurons = action_shape.n
     if isinstance(observation_shape, gym.spaces.Box):
       num_input_neurons = 1
       for x in observation_shape.shape:
         num_input_neurons *= x
+
+    if isinstance(action_shape, gym.spaces.Discrete):
+      num_output_neurons = action_shape.n
+      self._discrete = True
     self._configure(num_input_neurons, num_output_neurons)
 
+  def forward_pass(self, inputs):
+    activations = self._forward_pass(np.array([inputs]))
+    if self._discrete:
+      return tf.random.categorical(activations, num_samples=1).numpy().flatten()[0]
+    else:
+      return activations
+    
 
 class FeedForwardNetwork(Network):
   def __init__(self, hidden_layers):
@@ -38,8 +47,8 @@ class FeedForwardNetwork(Network):
 
     self.model = tf.keras.Model(inputs=self.input_layer, outputs=last_layer)
 
-  def forward_pass(self, inputs):
-    return self.model(np.array([inputs]))
+  def _forward_pass(self, inputs):
+    return self.model(inputs)
 
   def summary():
     model.summary()

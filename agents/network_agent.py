@@ -11,6 +11,5 @@ class NetworkAgent(AbstractAgent):
     
 
   def select_action(self, observation):
-    probs = self.network.forward_pass(observation)
-    return tf.random.categorical(probs, 1).numpy()[0][0]
+    return self.network.forward_pass(observation)
 
