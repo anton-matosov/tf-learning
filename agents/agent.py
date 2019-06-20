@@ -1,9 +1,8 @@
 
 
 class RandomAgent:
-  def __init__(self, env, *args, **kwargs):
+  def __init__(self, env):
     self.env = env
-    return super().__init__(*args, **kwargs)
 
   def select_action(self, observation):
     return self.env.action_space.sample()
