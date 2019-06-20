@@ -3,24 +3,14 @@ import argparse
 
 import gym
 
-class Agent:
-  def __init__(self, env, *args, **kwargs):
-    self.env = env
-    return super().__init__(*args, **kwargs)
-
-  def select_action(self, observation):
-    return self.env.action_space.sample()
-
-  def register_reward(self, observation, reward, done):
-    pass
+from agents import RandomAgent
 
 num_episodes = 20
 num_steps_per_episode = 100
 env_name = 'CartPole-v0'
 
 env = gym.make(env_name)
-agent = Agent(env)
-
+agent = RandomAgent(env)
 
 for i_episode in range(num_episodes):
     observation = env.reset()
