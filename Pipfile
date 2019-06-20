@@ -7,6 +7,7 @@ verify_ssl = true
 
 [packages]
 gym = {extras = ["box2d"],version = "*"}
+tensorflow = "*"
 
 [requires]
 python_version = "3.7"
