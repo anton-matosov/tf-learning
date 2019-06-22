@@ -41,7 +41,13 @@ class FeedForwardNetwork(Network):
     for num_neurons in self.hidden_layers:
       self.model.add(layers.Dense(num_neurons, activation=tf.nn.relu))
     
-    self.model.add(layers.Dense(num_output_neurons, activation=output_activation))
+    # self.model.add(layers.Dense(num_output_neurons, activation=output_activation))
+    self.model.add(layers.Dense(num_output_neurons, 
+        activation=None,
+        kernel_initializer=tf.compat.v1.initializers.random_uniform(
+            minval=-0.03, maxval=0.03),
+        bias_initializer=tf.compat.v1.initializers.constant(-0.2),
+      ))
 
   def _forward_pass(self, inputs):
     return self.model(inputs)
@@ -52,7 +58,10 @@ class FeedForwardNetwork(Network):
   def clone(self):
     copy = FeedForwardNetwork(self.hidden_layers)
     copy.model = tf.keras.models.clone_model(self.model)
-    copy.model.set_weights(self.model.get_weights()) 
+    copy.copy_weights_from(self) 
     return copy
+
+  def copy_weights_from(self, other):
+    self.model.set_weights(other.model.get_weights()) 
 
 

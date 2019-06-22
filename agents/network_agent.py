@@ -7,18 +7,18 @@ import collections
 
 Experience = collections.namedtuple('Experience', field_names=['observation', 'action', 'reward', 'done', 'new_observation'])
 
-REPLAY_BUFFER_SIZE = 10 * 1000
+REPLAY_BUFFER_SIZE = 100 * 1000
 REPLAY_MIN_SIZE = 1000
 
 
 LEARNING_RATE = 1e-8
-EPSILON = .2
+EPSILON = .1
 
-GAMMA = 0.9
+GAMMA = 1.
 
-TARGET_NETWORK_LIFETIME = 30
+TARGET_NETWORK_LIFETIME = 10
 
-TRAINING_ITERATIONS = 15
+TRAINING_ITERATIONS = 5
 BATCH_SIZE = 32
 
 class ExperienceBuffer:
@@ -35,15 +35,17 @@ class ExperienceBuffer:
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
         observations, actions, rewards, dones, next_observations = zip(*[self.buffer[idx] for idx in indices])
         return np.array(observations), np.array(actions), np.array(rewards, dtype=np.float32), \
-               np.array(dones, dtype=np.uint8), np.array(next_observations)
+               np.array(dones, dtype=np.bool), np.array(next_observations)
 
 
 class DqnTeacher:
   def __init__(self):
     self.buffer = ExperienceBuffer(REPLAY_BUFFER_SIZE)
+    self._target_network = None
     self._target_network_used = TARGET_NETWORK_LIFETIME
-    self.optimizer = tf.keras.optimizers.Adam(LEARNING_RATE)
+    self.optimizer = tf.compat.v1.train.AdamOptimizer(LEARNING_RATE)
     # self.optimizer = tf.keras.optimizers.RMSprop(LEARNING_RATE)
+    self.train_step_counter = tf.Variable(0, trainable=False, name='train_step_counter')
 
   def record_experience(self, experience):
     self.buffer.append(experience)
@@ -55,9 +57,7 @@ class DqnTeacher:
     if len(self.buffer) < REPLAY_MIN_SIZE:
       return
 
-    self._target_network_used += 1
-    if self._target_network_used >= TARGET_NETWORK_LIFETIME:
-      self._target_network_used = 0
+    if not self._target_network:
       self._target_network = qnetwork.clone()
 
     for _ in range(TRAINING_ITERATIONS):
@@ -68,7 +68,14 @@ class DqnTeacher:
       gradients = tape.gradient(loss, qnetwork.model.trainable_variables)
 
       # print("loss", loss)
-      self.optimizer.apply_gradients(zip(gradients, qnetwork.model.trainable_variables))
+      self.optimizer.apply_gradients(
+        zip(gradients, qnetwork.model.trainable_variables),
+        global_step=self.train_step_counter)
+
+    self._target_network_used += 1
+    if self._target_network_used >= TARGET_NETWORK_LIFETIME:
+      self._target_network_used = 0
+      self._target_network.copy_weights_from(qnetwork)
 
   def compute_loss(self, batch, net, tgt_net):
     states, actions, rewards, dones, next_states = batch
@@ -81,10 +88,15 @@ class DqnTeacher:
     next_q_values = tgt_net.forward_pass(next_states)
     next_state_values = tf.math.reduce_max(next_q_values, axis=1)
     
-    expected_state_action_values = next_state_values * GAMMA + rewards
+    expected_state_action_values = tf.stop_gradient(next_state_values * GAMMA + rewards)
 
-    losses = tf.math.squared_difference(state_action_values_flat, expected_state_action_values)
-    loss = - tf.reduce_mean(losses)
+    valid_mask = tf.cast(~dones, tf.float32)
+    
+    td_error = valid_mask * (expected_state_action_values - state_action_values_flat)
+    
+    # losses = tf.math.squared_difference(state_action_values_flat, expected_state_action_values)
+    losses = valid_mask * tf.compat.v1.losses.mean_squared_error(state_action_values_flat, expected_state_action_values)
+    loss = tf.reduce_mean(losses)
     return loss
 
 class NetworkAgent(AbstractAgent):
@@ -111,5 +123,7 @@ class NetworkAgent(AbstractAgent):
     experience = Experience(self.last_observation, self.last_action, reward, done, observation)
     self.teacher.record_experience(experience)
 
-  def episode_ended(self):
     self.teacher.learn(self.network)
+
+  # def episode_ended(self):
+  #   self.teacher.learn(self.network)

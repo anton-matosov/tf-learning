@@ -17,7 +17,7 @@ engine = Engine(
   env_name = 'CartPole-v0',
 )
 
-network = FeedForwardNetwork([20, 30])
+network = FeedForwardNetwork([100])
 
 agent = NetworkAgent(engine.env, network)
 network.summary()
