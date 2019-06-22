@@ -50,8 +50,9 @@ class FeedForwardNetwork(Network):
     self.model.summary()
 
   def clone(self):
-    copy = tf.keras.models.clone_model(self.model)
-    copy.set_weights(self.model.get_weights()) 
+    copy = FeedForwardNetwork(self.hidden_layers)
+    copy.model = tf.keras.models.clone_model(self.model)
+    copy.model.set_weights(self.model.get_weights()) 
     return copy
 
 

@@ -13,6 +13,7 @@ REPLAY_MIN_SIZE = 20
 
 TARGET_NETWORK_LIFETIME = 100
 
+GAMMA = 0.9
 BATCH_SIZE = 10
 
 class ExperienceBuffer:
@@ -57,22 +58,21 @@ class DqnTeacher:
   def calc_loss(self, batch, net, tgt_net):
     states, actions, rewards, dones, next_states = batch
 
-    # states_v = tf.Tensor(states)
-    # next_states_v = tf.Tensor(next_states)
-    # actions_v = tf.Tensor(actions)
-    # rewards_v = tf.Tensor(rewards)
-    # done_mask = tf.Tensor(dones)
+    q_values = net.forward_pass(states)
+    actions_tf = tf.expand_dims(actions, -1)
+    state_action_values = tf.gather(q_values, actions_tf, batch_dims=1)
+    state_action_values_flat = tf.squeeze(state_action_values, -1)
+    # print("q_values", q_values, "actions_tf", actions_tf)
+    # print("state_action_values", state_action_values)
 
-    activations = net.forward_pass(states)
+    next_q_values = tgt_net.forward_pass(next_states)
+    next_state_values = tf.math.reduce_max(next_q_values, axis=1)
     
-    # state_action_values = net(states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
-    # next_state_values = tgt_net(next_states_v).max(1)[0]
-    # next_state_values[done_mask] = 0.0
-    # next_state_values = next_state_values.detach()
+    expected_state_action_values = next_state_values * GAMMA + rewards
 
-    # expected_state_action_values = next_state_values * GAMMA + rewards_v
-    # return nn.MSELoss()(state_action_values, expected_state_action_values)
-
+    losses = tf.squared_difference(state_action_values_flat, expected_state_action_values)
+    loss = tf.reduce_mean(losses)
+    return loss
 
 class NetworkAgent(AbstractAgent):
   def __init__(self, env, network):
