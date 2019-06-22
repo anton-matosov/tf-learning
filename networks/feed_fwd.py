@@ -17,13 +17,16 @@ class Network():
 
     if isinstance(action_shape, gym.spaces.Discrete):
       num_output_neurons = action_shape.n
-      self._discrete = True
+      self.discrete = True
 
     self._configure(input_shape, num_output_neurons, output_activation)
 
-  def forward_pass(self, inputs):
-    self.activations = self._forward_pass(np.array([inputs]))
+  def forward_pass(self, observations_batch):
+    self.activations = self._forward_pass(observations_batch)
     return self.activations
+
+
+
 
 class FeedForwardNetwork(Network):
   def __init__(self, hidden_layers):
@@ -43,6 +46,12 @@ class FeedForwardNetwork(Network):
   def _forward_pass(self, inputs):
     return self.model(inputs)
 
-  def summary():
-    model.summary()
+  def summary(self):
+    self.model.summary()
+
+  def clone(self):
+    copy = tf.keras.models.clone_model(self.model)
+    copy.set_weights(self.model.get_weights()) 
+    return copy
+
 

@@ -9,6 +9,7 @@ class Engine:
     
   def rollout(self, agent):
     for i_episode in range(self.num_episodes):
+      self.total_reward = 0
       agent.episode_started()
       observation = self.env.reset()
       for t in range(self.num_steps_per_episode):
@@ -17,7 +18,7 @@ class Engine:
           observation, done = self.step_env(agent, observation)
 
           if done:
-              print("Episode finished after {} timesteps".format(t+1))
+              print("Episode finished after {} timesteps. Total reward: {}".format(t+1, self.total_reward))
               break
       agent.episode_ended()
 
@@ -33,6 +34,8 @@ class Engine:
     observation, reward, done, info = self.env.step(action)
 
     agent.register_reward(observation, reward, done)
+    self.total_reward += reward
+
     return observation, done
 
   def render_env(self):

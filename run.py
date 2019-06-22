@@ -2,7 +2,7 @@
 import argparse
 
 import tensorflow as tf
-tf.enable_eager_execution()
+tf.compat.v1.enable_eager_execution()
 
 import gym
 
@@ -13,11 +13,16 @@ from networks import FeedForwardNetwork
 
 engine = Engine(
   num_episodes = 20,
-  num_steps_per_episode = 100,
+  num_steps_per_episode = 200,
   env_name = 'CartPole-v0',
 )
 
-agent = NetworkAgent(engine.env, FeedForwardNetwork([20, 30]))
+network = FeedForwardNetwork([20, 30])
+
+agent = NetworkAgent(engine.env, network)
+network.summary()
+
 # agent = RandomAgent(engine.env)
+
 
 engine.rollout(agent)
