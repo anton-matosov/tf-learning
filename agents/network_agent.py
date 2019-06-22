@@ -14,6 +14,8 @@ REPLAY_MIN_SIZE = 20
 TARGET_NETWORK_LIFETIME = 100
 
 GAMMA = 0.9
+
+TRAINING_ITERATIONS = 20
 BATCH_SIZE = 10
 
 class ExperienceBuffer:
@@ -37,6 +39,7 @@ class DqnTeacher:
   def __init__(self):
     self.buffer = ExperienceBuffer(REPLAY_BUFFER_SIZE)
     self._target_network_used = TARGET_NETWORK_LIFETIME
+    self.optimizer = tf.keras.optimizers.Adam(1e-4)
 
   def record_experience(self, experience):
     self.buffer.append(experience)
@@ -50,12 +53,16 @@ class DqnTeacher:
       self._target_network_used = 0
       self._target_network = qnetwork.clone()
 
-    batch = self.buffer.sample(BATCH_SIZE)
-    loss_t = self.calc_loss(batch, qnetwork, self._target_network)
-    # loss_t.backward()
-    # optimizer.step()
+    for _ in range(TRAINING_ITERATIONS):
+      batch = self.buffer.sample(BATCH_SIZE)
 
-  def calc_loss(self, batch, net, tgt_net):
+      with tf.GradientTape() as tape:
+        loss = self.compute_loss(batch, qnetwork, self._target_network)
+        gradients = tape.gradient(loss, qnetwork.model.trainable_variables)
+
+        self.optimizer.apply_gradients(zip(gradients, qnetwork.model.trainable_variables))
+
+  def compute_loss(self, batch, net, tgt_net):
     states, actions, rewards, dones, next_states = batch
 
     q_values = net.forward_pass(states)
