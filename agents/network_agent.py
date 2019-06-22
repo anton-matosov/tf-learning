@@ -8,11 +8,15 @@ import collections
 Experience = collections.namedtuple('Experience', field_names=['observation', 'action', 'reward', 'done', 'new_observation'])
 
 REPLAY_BUFFER_SIZE = 10 * 1000
-REPLAY_MIN_SIZE = REPLAY_BUFFER_SIZE / 10
+REPLAY_MIN_SIZE = 1000
 
-TARGET_NETWORK_LIFETIME = 40
+
+LEARNING_RATE = 1e-8
+EPSILON = .2
 
 GAMMA = 0.9
+
+TARGET_NETWORK_LIFETIME = 30
 
 TRAINING_ITERATIONS = 15
 BATCH_SIZE = 32
@@ -38,13 +42,14 @@ class DqnTeacher:
   def __init__(self):
     self.buffer = ExperienceBuffer(REPLAY_BUFFER_SIZE)
     self._target_network_used = TARGET_NETWORK_LIFETIME
-    self.optimizer = tf.keras.optimizers.Adam(1e-6)
+    self.optimizer = tf.keras.optimizers.Adam(LEARNING_RATE)
+    # self.optimizer = tf.keras.optimizers.RMSprop(LEARNING_RATE)
 
   def record_experience(self, experience):
     self.buffer.append(experience)
 
   def force_explore(self):
-    return len(self.buffer) < REPLAY_MIN_SIZE * 2
+    return len(self.buffer) < REPLAY_MIN_SIZE
 
   def learn(self, qnetwork):
     if len(self.buffer) < REPLAY_MIN_SIZE:
@@ -72,8 +77,6 @@ class DqnTeacher:
     actions_tf = tf.expand_dims(actions, -1)
     state_action_values = tf.gather(q_values, actions_tf, batch_dims=1)
     state_action_values_flat = tf.squeeze(state_action_values, -1)
-    # print("q_values", q_values, "actions_tf", actions_tf)
-    # print("state_action_values", state_action_values)
 
     next_q_values = tgt_net.forward_pass(next_states)
     next_state_values = tf.math.reduce_max(next_q_values, axis=1)
@@ -90,7 +93,7 @@ class NetworkAgent(AbstractAgent):
 
     self.teacher = DqnTeacher()
 
-    self.epsilon = 0.1
+    self.epsilon = EPSILON
     self.network = network
     self.network.configure(self.observation_space, self.action_space, tf.nn.relu)
 
