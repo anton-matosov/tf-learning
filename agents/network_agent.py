@@ -8,15 +8,14 @@ import collections
 Experience = collections.namedtuple('Experience', field_names=['observation', 'action', 'reward', 'done', 'new_observation'])
 
 REPLAY_BUFFER_SIZE = 10 * 1000
-REPLAY_MIN_SIZE = 20
-# REPLAY_MIN_SIZE = REPLAY_BUFFER_SIZE / 10
+REPLAY_MIN_SIZE = REPLAY_BUFFER_SIZE / 10
 
-TARGET_NETWORK_LIFETIME = 100
+TARGET_NETWORK_LIFETIME = 40
 
 GAMMA = 0.9
 
-TRAINING_ITERATIONS = 20
-BATCH_SIZE = 10
+TRAINING_ITERATIONS = 15
+BATCH_SIZE = 32
 
 class ExperienceBuffer:
     def __init__(self, capacity):
@@ -39,10 +38,13 @@ class DqnTeacher:
   def __init__(self):
     self.buffer = ExperienceBuffer(REPLAY_BUFFER_SIZE)
     self._target_network_used = TARGET_NETWORK_LIFETIME
-    self.optimizer = tf.keras.optimizers.Adam(1e-4)
+    self.optimizer = tf.keras.optimizers.Adam(1e-6)
 
   def record_experience(self, experience):
     self.buffer.append(experience)
+
+  def force_explore(self):
+    return len(self.buffer) < REPLAY_MIN_SIZE * 2
 
   def learn(self, qnetwork):
     if len(self.buffer) < REPLAY_MIN_SIZE:
@@ -58,9 +60,10 @@ class DqnTeacher:
 
       with tf.GradientTape() as tape:
         loss = self.compute_loss(batch, qnetwork, self._target_network)
-        gradients = tape.gradient(loss, qnetwork.model.trainable_variables)
+      gradients = tape.gradient(loss, qnetwork.model.trainable_variables)
 
-        self.optimizer.apply_gradients(zip(gradients, qnetwork.model.trainable_variables))
+      # print("loss", loss)
+      self.optimizer.apply_gradients(zip(gradients, qnetwork.model.trainable_variables))
 
   def compute_loss(self, batch, net, tgt_net):
     states, actions, rewards, dones, next_states = batch
@@ -77,8 +80,8 @@ class DqnTeacher:
     
     expected_state_action_values = next_state_values * GAMMA + rewards
 
-    losses = tf.squared_difference(state_action_values_flat, expected_state_action_values)
-    loss = tf.reduce_mean(losses)
+    losses = tf.math.squared_difference(state_action_values_flat, expected_state_action_values)
+    loss = - tf.reduce_mean(losses)
     return loss
 
 class NetworkAgent(AbstractAgent):
@@ -87,13 +90,18 @@ class NetworkAgent(AbstractAgent):
 
     self.teacher = DqnTeacher()
 
+    self.epsilon = 0.1
     self.network = network
-    self.network.configure(self.observation_space, self.action_space)
+    self.network.configure(self.observation_space, self.action_space, tf.nn.relu)
 
   def select_action(self, observation):
-    q_values = self.network.forward_pass(np.array([observation]))
     self.last_observation = observation
-    self.last_action = tf.math.argmax(q_values[0]).numpy()
+    if self.teacher.force_explore() or np.random.random() < self.epsilon:
+      self.last_action = self.env.action_space.sample()
+    else:
+      q_values = self.network.forward_pass(np.expand_dims(observation, 0))[0]
+      self.last_action = tf.math.argmax(q_values).numpy()
+
     return self.last_action
 
   def register_reward(self, observation, reward, done):

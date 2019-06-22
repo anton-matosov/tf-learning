@@ -18,7 +18,8 @@ class Engine:
           observation, done = self.step_env(agent, observation)
 
           if done:
-              print("Episode finished after {} timesteps. Total reward: {}".format(t+1, self.total_reward))
+              print("Episode {} finished after {} timesteps. Total reward: {}"
+                .format(i_episode + 1, t + 1, self.total_reward))
               break
       agent.episode_ended()
 

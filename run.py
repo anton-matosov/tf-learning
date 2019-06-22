@@ -12,7 +12,7 @@ from networks import FeedForwardNetwork
 
 
 engine = Engine(
-  num_episodes = 20,
+  num_episodes = 2000,
   num_steps_per_episode = 200,
   env_name = 'CartPole-v0',
 )
