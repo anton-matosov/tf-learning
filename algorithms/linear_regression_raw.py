@@ -56,6 +56,14 @@ def train(model, input, output, learning_rate):
 # 
 
 #%%
+def train_using_optimizer(model, inputs, outputs, optimizer):
+  with tf.GradientTape() as tape:
+    current_loss = loss(model(inputs), outputs)
+  vars = [model.W, model.b]
+  grads = tape.gradient(current_loss, vars)
+  optimizer.apply_gradients(zip(grads, vars))
+  return current_loss
+#%%
 
 model = Model()
 historyW, historyB, historyLoss = [], [], []
@@ -63,14 +71,17 @@ historyW, historyB, historyLoss = [], [], []
 #%%
 
 
-NUM_EPOCHS = 100
-LEARNING_RATE = 0.03
+NUM_EPOCHS = 1000
+LEARNING_RATE = 0.1
+
+optimizer = tf.train.AdamOptimizer(LEARNING_RATE)
 
 for epoch in range(NUM_EPOCHS):
   historyW.append(model.W.numpy())
   historyB.append(model.b.numpy())
 
-  current_loss = train(model, inputs, outputs, LEARNING_RATE)
+  # current_loss = train(model, inputs, outputs, LEARNING_RATE)
+  current_loss = train_using_optimizer(model, inputs, outputs, optimizer)
   historyLoss.append(current_loss)
   
   # print('Epoch %2d: W=%1.2f b=%1.2f, loss=%2.5f' % (epoch, model.W.numpy(), model.b.numpy(), current_loss))
