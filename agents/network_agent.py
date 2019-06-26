@@ -7,16 +7,19 @@ import collections
 
 Experience = collections.namedtuple('Experience', field_names=['observation', 'action', 'reward', 'done', 'new_observation'])
 
-REPLAY_BUFFER_SIZE = 100 * 1000
+REPLAY_BUFFER_SIZE = 10 * 1000
 REPLAY_MIN_SIZE = 1000
 
 
-LEARNING_RATE = 1e-8
-EPSILON = .1
+LEARNING_RATE = 1e-6
+EPSILON_MAX = .9
+EPSILON_MIN = .1
+EPSILON_LAST_STEP = REPLAY_BUFFER_SIZE
+EPSILON_SPACE = np.linspace(EPSILON_MAX, EPSILON_MIN, EPSILON_LAST_STEP)
 
-GAMMA = 1.
+GAMMA = .9
 
-TARGET_NETWORK_LIFETIME = 10
+TARGET_NETWORK_LIFETIME = 50
 
 TRAINING_ITERATIONS = 5
 BATCH_SIZE = 32
@@ -43,6 +46,7 @@ class DqnTeacher:
     self.buffer = ExperienceBuffer(REPLAY_BUFFER_SIZE)
     self._target_network = None
     self._target_network_used = TARGET_NETWORK_LIFETIME
+    # self.optimizer = tf.compat.v1.train.GradientDescentOptimizer(LEARNING_RATE)
     self.optimizer = tf.compat.v1.train.AdamOptimizer(LEARNING_RATE)
     # self.optimizer = tf.keras.optimizers.RMSprop(LEARNING_RATE)
     self.train_step_counter = tf.Variable(0, trainable=False, name='train_step_counter')
@@ -94,9 +98,13 @@ class DqnTeacher:
     
     td_error = valid_mask * (expected_state_action_values - state_action_values_flat)
     
-    # losses = tf.math.squared_difference(state_action_values_flat, expected_state_action_values)
-    losses = valid_mask * tf.compat.v1.losses.mean_squared_error(state_action_values_flat, expected_state_action_values)
+    losses = valid_mask * tf.compat.v1.losses.mean_squared_error(expected_state_action_values, state_action_values_flat, reduction=tf.compat.v1.losses.Reduction.NONE)
     loss = tf.reduce_mean(losses)
+
+    with tf.name_scope('Losses/'):
+      tf.compat.v2.summary.scalar(name='loss', data=loss, step=self.train_step_counter.numpy())
+      tf.compat.v2.summary.histogram(name='td_error', data=td_error, step=self.train_step_counter.numpy())
+
     return loss
 
 class NetworkAgent(AbstractAgent):
@@ -105,9 +113,13 @@ class NetworkAgent(AbstractAgent):
 
     self.teacher = DqnTeacher()
 
-    self.epsilon = EPSILON
     self.network = network
     self.network.configure(self.observation_space, self.action_space, tf.nn.relu)
+
+  @property
+  def epsilon(self):
+    current_step = self.teacher.train_step_counter.numpy()
+    return EPSILON_SPACE[np.minimum(current_step, EPSILON_LAST_STEP - 1)]
 
   def select_action(self, observation):
     self.last_observation = observation
@@ -125,5 +137,6 @@ class NetworkAgent(AbstractAgent):
 
     self.teacher.learn(self.network)
 
-  # def episode_ended(self):
+  def episode_ended(self):
+    print("Trained steps: ", self.teacher.train_step_counter.numpy())
   #   self.teacher.learn(self.network)
