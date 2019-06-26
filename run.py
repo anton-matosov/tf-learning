@@ -19,8 +19,9 @@ writer = tf.contrib.summary.create_file_writer(path.join(summaries_dir, 'dqn', d
 writer.set_as_default()
 
 engine = Engine(
-  num_episodes = 3000,
-  num_steps_per_episode = 200,
+  max_total_steps = 20000,
+  max_episodes = 3000,
+  max_steps_per_episode = 200,
   env_name = 'CartPole-v0',
 )
 

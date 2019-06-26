@@ -7,22 +7,22 @@ import collections
 
 Experience = collections.namedtuple('Experience', field_names=['observation', 'action', 'reward', 'done', 'new_observation'])
 
-REPLAY_BUFFER_SIZE = 100 * 1000
+REPLAY_BUFFER_SIZE = 20 * 1000
 REPLAY_MIN_SIZE = 1000
 
 
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-6
 EPSILON_MAX = .9
 EPSILON_MIN = .1
-EPSILON_LAST_STEP = 15 * 1000
+EPSILON_LAST_STEP = 3 * 1000
 EPSILON_SPACE = np.linspace(EPSILON_MAX, EPSILON_MIN, EPSILON_LAST_STEP)
 
 GAMMA = .9
 
-TARGET_NETWORK_LIFETIME = 10
+TARGET_NETWORK_LIFETIME = 1
 
-TRAINING_ITERATIONS = 10
-BATCH_SIZE = 32
+TRAINING_ITERATIONS = 1
+BATCH_SIZE = 64
 
 class ExperienceBuffer:
     def __init__(self, capacity):
@@ -232,6 +232,6 @@ class NetworkAgent(AbstractAgent):
 
     self.teacher.learn(self.network)
 
-  def episode_ended(self):
-    print("Trained steps: ", self.teacher.train_step_counter.numpy())
+  # def episode_ended(self):
+    # print("Trained steps: ", self.teacher.train_step_counter.numpy())
   #   self.teacher.learn(self.network)
