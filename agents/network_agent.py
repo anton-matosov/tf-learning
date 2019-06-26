@@ -177,7 +177,7 @@ class DqnTeacher:
     loss = tf.reduce_mean(td_loss)
 
     with tf.name_scope('Losses/'):
-      tf.compat.v2.summary.scalar(name='loss', data=loss, step=self.train_step_counter.numpy())
+      tf.compat.v2.summary.scalar(name='loss', data=loss, step=self.train_step_counter)
 
     if self._debug_summaries:
       td_error = valid_mask * (expected_state_action_values - state_action_values_flat)
@@ -212,15 +212,15 @@ class NetworkAgent(AbstractAgent):
   def select_action(self, observation):
     self.last_observation = observation
     with tf.name_scope('Agent/'):
-      tf.compat.v2.summary.scalar(name='epsilon', data=self.epsilon, step=self.train_step_counter.numpy())
+      tf.compat.v2.summary.scalar(name='epsilon', data=self.epsilon, step=self.teacher.train_step_counter)
 
     if self.teacher.force_explore() or np.random.random() < self.epsilon:
       self.last_action = self.env.action_space.sample()
       with tf.name_scope('Agent/'):
-        tf.compat.v2.summary.scalar(name='explore', data=True, step=self.train_step_counter.numpy())
+        tf.compat.v2.summary.scalar(name='explore', data=True, step=self.teacher.train_step_counter)
     else:
       with tf.name_scope('Agent/'):
-        tf.compat.v2.summary.scalar(name='explore', data=False, step=self.train_step_counter.numpy())
+        tf.compat.v2.summary.scalar(name='explore', data=False, step=self.teacher.train_step_counter)
       q_values = self.network.forward_pass(np.expand_dims(observation, 0))[0]
       self.last_action = tf.math.argmax(q_values).numpy()
 
