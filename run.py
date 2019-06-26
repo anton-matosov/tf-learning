@@ -14,7 +14,7 @@ from networks import FeedForwardNetwork
 
 summaries_dir = "runs"
 
-date_mark = datetime.now().strftime("%Y-%m-%d-%H:%M:%S.%f")
+date_mark = datetime.now().strftime("%Y-%m-%d--%H-%M-%S.%f")
 writer = tf.contrib.summary.create_file_writer(path.join(summaries_dir, 'dqn', date_mark))
 writer.set_as_default()
 
