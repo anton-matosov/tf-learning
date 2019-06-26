@@ -10,6 +10,7 @@ gym = {extras = ["box2d"],version = "*"}
 tensorflow = "*"
 numpy = "*"
 matplotlib = "*"
+jupyter = "*"
 
 [requires]
 python_version = "3.7"
