@@ -12,6 +12,8 @@ from agents import RandomAgent, NetworkAgent
 from engine import Engine
 from networks import FeedForwardNetwork
 
+from tf_learning.algorithms import DqnTeacher
+
 summaries_dir = "runs"
 
 date_mark = datetime.now().strftime("%Y-%m-%d--%H-%M-%S.%f")
@@ -27,10 +29,9 @@ engine = Engine(
 
 network = FeedForwardNetwork([100])
 
-agent = NetworkAgent(engine.env, network)
+dqnAgent = NetworkAgent(engine.env, network, DqnTeacher())
 network.summary()
 
 # agent = RandomAgent(engine.env)
 
-
-engine.rollout(agent)
+engine.rollout(dqnAgent)
