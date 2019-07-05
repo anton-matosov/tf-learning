@@ -69,6 +69,6 @@ class FeedForwardNetwork(Network):
     return copy
 
   def copy_weights_from(self, other):
-    self.model.set_weights(other.model.get_weights()) 
+    self.model.set_weights(other.model.get_weights())
 
 
