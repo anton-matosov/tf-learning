@@ -7,7 +7,7 @@ REPLAY_BUFFER_SIZE = 20 * 1000
 REPLAY_MIN_SIZE = 1000
 
 
-LEARNING_RATE = 1e-6
+LEARNING_RATE = 5e-4
 
 GAMMA = .9
 
@@ -74,19 +74,18 @@ class DqnTeacher:
     next_q_values = tgt_net.forward_pass(next_states)
     next_state_values = tf.math.reduce_max(next_q_values, axis=1)
     
-    expected_state_action_values = tf.stop_gradient(next_state_values * GAMMA + rewards)
-
     valid_mask = tf.cast(~dones, tf.float32)
-    
-    
-    td_loss = valid_mask * tf.compat.v1.losses.mean_squared_error(expected_state_action_values, state_action_values_flat, reduction=tf.compat.v1.losses.Reduction.NONE)
+
+    expected_state_action_values = tf.stop_gradient(rewards + valid_mask * GAMMA * next_state_values)
+
+    td_loss = tf.compat.v1.losses.mean_squared_error(expected_state_action_values, state_action_values_flat, reduction=tf.compat.v1.losses.Reduction.NONE)
     loss = tf.reduce_mean(td_loss)
 
     with tf.name_scope('Losses/'):
       tf.compat.v2.summary.scalar(name='loss', data=loss, step=self.train_step_counter)
 
     if self._debug_summaries:
-      td_error = valid_mask * (expected_state_action_values - state_action_values_flat)
+      td_error = expected_state_action_values - state_action_values_flat
       diff_q_values = state_action_values_flat - expected_state_action_values
       generate_tensor_summaries('td_error', td_error,
                                         self.train_step_counter)
