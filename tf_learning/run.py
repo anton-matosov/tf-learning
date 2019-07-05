@@ -17,7 +17,7 @@ from tf_learning.algorithms import DqnTeacher
 summaries_dir = "runs"
 
 date_mark = datetime.now().strftime("%Y-%m-%d--%H-%M-%S.%f")
-writer = tf.contrib.summary.create_file_writer(path.join(summaries_dir, 'dqn', date_mark))
+writer = tf.compat.v2.summary.create_file_writer(path.join(summaries_dir, 'dqn', date_mark))
 writer.set_as_default()
 
 engine = Engine(
@@ -25,6 +25,7 @@ engine = Engine(
   max_episodes = 3000,
   max_steps_per_episode = 200,
   env_name = 'CartPole-v0',
+  # env_name = 'FrozenLake-v0',
 )
 
 network = FeedForwardNetwork([100])

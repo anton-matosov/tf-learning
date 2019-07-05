@@ -14,12 +14,16 @@ class Network():
   def configure(self, observation_shape, action_shape, output_activation = None):
     if isinstance(observation_shape, gym.spaces.Box):
       input_shape = observation_shape.shape
+      input_layer = layers.Input(input_shape)
+
+    if isinstance(observation_shape, gym.spaces.Discrete):
+      input_shape = observation_shape.n
+      input_layer = layers.Embedding(input_dim=input_shape, output_dim=input_shape, input_length=1)
 
     if isinstance(action_shape, gym.spaces.Discrete):
       num_output_neurons = action_shape.n
-      self.discrete = True
 
-    self._configure(input_shape, num_output_neurons, output_activation)
+    self._configure(input_layer, num_output_neurons, output_activation)
 
   def forward_pass(self, observations_batch):
     self.activations = self._forward_pass(observations_batch)
@@ -33,11 +37,12 @@ class FeedForwardNetwork(Network):
     super(FeedForwardNetwork, self).__init__()
     self.hidden_layers = hidden_layers
     
-  def _configure(self, input_shape, num_output_neurons, output_activation = None):
+  def _configure(self, input_layer, num_output_neurons, output_activation = None):
     self.model = tf.keras.Sequential()
 
-    self.model.add(layers.Input(input_shape))
+    self.model.add(input_layer)
     self.model.add(tf.keras.layers.Flatten())
+
     for num_neurons in self.hidden_layers:
       self.model.add(layers.Dense(num_neurons, activation=tf.nn.relu,
       kernel_initializer=tf.compat.v1.variance_scaling_initializer(
