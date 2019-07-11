@@ -5,7 +5,7 @@ from tf_learning.common import *
 from tf_learning.agents import AbstractAgent
 
 
-class NetworkAgent(AbstractAgent):
+class NetworkAgentAllInOne(AbstractAgent):
   def __init__(self, env, network, teacher):
     super().__init__(env)
 

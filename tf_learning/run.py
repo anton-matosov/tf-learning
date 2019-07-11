@@ -8,7 +8,7 @@ import gym
 from datetime import datetime
 from os import path
 
-from agents import RandomAgent, NetworkAgent
+from agents import RandomAgent, NetworkAgentAllInOne
 from engine import Engine
 from networks import FeedForwardNetwork
 
@@ -30,7 +30,7 @@ engine = Engine(
 
 network = FeedForwardNetwork([100])
 
-dqnAgent = NetworkAgent(engine.env, network, DqnTeacher())
+dqnAgent = NetworkAgentAllInOne(engine.env, network, DqnTeacher())
 network.summary()
 
 # agent = RandomAgent(engine.env)
