@@ -44,17 +44,9 @@ class FeedForwardNetwork(Network):
     self.model.add(tf.keras.layers.Flatten())
 
     for num_neurons in self.hidden_layers:
-      self.model.add(layers.Dense(num_neurons, activation=tf.nn.relu,
-      kernel_initializer=tf.compat.v1.variance_scaling_initializer(
-          scale=2.0, mode='fan_in', distribution='truncated_normal')))
+      self.model.add(layers.Dense(num_neurons, activation=tf.nn.relu))
     
-    # self.model.add(layers.Dense(num_output_neurons, activation=output_activation))
-    self.model.add(layers.Dense(num_output_neurons, 
-        activation=None,
-        kernel_initializer=tf.compat.v1.initializers.random_uniform(
-            minval=-0.03, maxval=0.03),
-        bias_initializer=tf.compat.v1.initializers.constant(-0.2),
-      ))
+    self.model.add(layers.Dense(num_output_neurons, activation=output_activation))
 
   def _forward_pass(self, inputs):
     return self.model(inputs)
