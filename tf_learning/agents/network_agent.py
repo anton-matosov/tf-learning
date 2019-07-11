@@ -10,7 +10,7 @@ class NetworkAgent(AbstractAgent):
     super().__init__(env)
 
     self.epsilon_max = .9
-    self.epsilon_min = .1
+    self.epsilon_min = .02
     self.epsilon_last_step = 3 * 1000
     self.epsilon_space = np.linspace(self.epsilon_max, self.epsilon_min, self.epsilon_last_step)
 
