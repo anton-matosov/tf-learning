@@ -5,6 +5,37 @@ from tf_learning.common import *
 from tf_learning.agents import AbstractAgent
 
 
+class NetworkAgent(AbstractAgent):
+  def __init__(self, env, network):
+    super().__init__(env)
+
+    self.network = network
+    self.network.configure(self.observation_space, self.action_space, tf.nn.relu)
+
+  def select_action(self, observation):
+    q_values = self.network.forward_pass(np.expand_dims(observation, 0))[0]
+    return tf.math.argmax(q_values).numpy()
+
+
+
+class LearningAgent(AbstractAgent):
+  def __init__(self, env, teacher, decorated_agent):
+    super().__init__(env)
+    self.teacher = teacher
+    self.decorated_agent = decorated_agent
+
+  def select_action(self, observation):
+    self.last_action = self.decorated_agent.select_action(observation)
+    return self.last_action
+
+  def register_reward(self, observation, reward, done):
+    experience = Experience(self.last_observation, self.last_action, reward, done, observation)
+    self.teacher.record_experience(experience)
+
+    self.teacher.learn()
+
+
+
 class NetworkAgentAllInOne(AbstractAgent):
   def __init__(self, env, network, teacher):
     super().__init__(env)
