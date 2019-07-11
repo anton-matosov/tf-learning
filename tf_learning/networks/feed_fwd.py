@@ -4,6 +4,8 @@ from tensorflow.keras import layers
 import gym
 import numpy as np
 
+from tf_learning import common
+
 class Network():
   def forward_pass(self, input):
     pass
@@ -61,6 +63,7 @@ class FeedForwardNetwork(Network):
     return copy
 
   def copy_weights_from(self, other):
-    self.model.set_weights(other.model.get_weights())
+    common.soft_variables_update(
+        other.model.variables, self.model.variables, tau=1.0)
 
 
