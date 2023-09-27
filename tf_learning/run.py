@@ -4,7 +4,7 @@ import argparse
 import tensorflow as tf
 tf.compat.v1.enable_eager_execution()
 
-import gym
+import gymnasium as gym
 from datetime import datetime
 from os import path
 

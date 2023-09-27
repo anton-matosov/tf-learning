@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 from tensorflow.keras import layers
-import gym
+import gymnasium as gym
 import numpy as np
 
 from tf_learning import common
@@ -38,7 +38,7 @@ class FeedForwardNetwork(Network):
   def __init__(self, hidden_layers):
     super(FeedForwardNetwork, self).__init__()
     self.hidden_layers = hidden_layers
-    
+
   def _configure(self, input_layer, num_output_neurons, output_activation = None):
     self.model = tf.keras.Sequential()
 
@@ -47,7 +47,7 @@ class FeedForwardNetwork(Network):
 
     for num_neurons in self.hidden_layers:
       self.model.add(layers.Dense(num_neurons, activation=tf.nn.relu))
-    
+
     self.model.add(layers.Dense(num_output_neurons, activation=output_activation))
 
   def _forward_pass(self, inputs):
@@ -59,7 +59,7 @@ class FeedForwardNetwork(Network):
   def clone(self):
     copy = FeedForwardNetwork(self.hidden_layers)
     copy.model = tf.keras.models.clone_model(self.model)
-    copy.copy_weights_from(self) 
+    copy.copy_weights_from(self)
     return copy
 
   def copy_weights_from(self, other):

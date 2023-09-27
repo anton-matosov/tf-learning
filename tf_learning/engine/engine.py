@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gymnasium as gym
 
 class Engine:
   def __init__(self, env_name, max_total_steps = 20000,
@@ -9,7 +9,7 @@ class Engine:
     self.max_episodes = max_episodes
     self.max_steps_per_episode = max_steps_per_episode
     self.render = False
-    
+
   def rollout(self, agent):
     global_step = 0
     for i_episode in range(self.max_episodes):
