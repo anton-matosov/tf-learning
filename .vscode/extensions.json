@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "corker.vscode-micromamba",
+        "github.copilot",
+        "codezombiech.gitignore",
+        "eamodio.gitlens",
+        "ms-toolsai.jupyter",
+        "slevesque.vscode-multiclip",
+        "ms-python.python",
+        "mhutchie.git-graph",
+        "davidanson.vscode-markdownlint"
+    ]
+}

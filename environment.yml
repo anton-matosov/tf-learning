@@ -1,0 +1,24 @@
+# Micromamba environment file
+# https://marketplace.visualstudio.com/items?itemName=corker.vscode-micromamba
+
+name: default
+
+channels:
+  - nvidia
+  - conda-forge
+
+dependencies:
+  - python=3.10
+  - cudatoolkit=11.2
+  - cudnn=8.1.0
+  - pip
+  - numpy
+  - matplotlib
+  - jupyter
+  - gymnasium
+  - gymnasium-box2d
+  - gymnasium-atari
+  - gymnasium-classic_control
+  - pip:
+    - tensorflow<2.11
+
