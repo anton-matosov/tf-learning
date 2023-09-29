@@ -1,4 +1,4 @@
-import gymnasium as gymnasium as gym
+import gymnasium as gym
 
 class Engine:
   def __init__(self, env_name, max_total_steps = 20000,
