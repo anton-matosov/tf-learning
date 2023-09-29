@@ -55,7 +55,7 @@ class FeedForwardNetwork(Network):
 
   def summary(self):
     assert self.model is not None, "Network is not configured"
-    self.model.summary(print_fn=print)
+    self.model.summary()
 
   def clone(self):
     copy = FeedForwardNetwork(self.hidden_layers)
