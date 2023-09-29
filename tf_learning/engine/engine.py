@@ -2,7 +2,7 @@ import gymnasium as gym
 
 class Engine:
   def __init__(self, env_name, max_total_steps = 20000,
-      max_episodes = 3000,
+      max_episodes = 120,
       max_steps_per_episode = 200):
     self.env = gym.make(env_name)
     self.max_total_steps = max_total_steps

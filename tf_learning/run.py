@@ -17,7 +17,8 @@ from tf_learning.algorithms import DqnTeacher
 summaries_dir = "runs"
 
 date_mark = datetime.now().strftime("%Y-%m-%d--%H-%M-%S.%f")
-writer = tf.compat.v2.summary.create_file_writer(path.join(summaries_dir, 'dqn', date_mark))
+run_dir = path.join(summaries_dir, 'dqn', date_mark)
+writer = tf.compat.v2.summary.create_file_writer(run_dir)
 writer.set_as_default()
 
 engine = Engine(
@@ -35,4 +36,11 @@ network.summary()
 
 # agent = RandomAgent(engine.env)
 
-engine.rollout(dqnAgent)
+try:
+  print("Training started. Press Ctrl+C to interrupt")
+
+  engine.rollout(dqnAgent)
+except KeyboardInterrupt:
+  print("Training interrupted")
+
+network.save(path.join(run_dir, 'model.h5'))

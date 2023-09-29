@@ -57,6 +57,10 @@ class FeedForwardNetwork(Network):
     assert self.model is not None, "Network is not configured"
     self.model.summary()
 
+  def save(self, path):
+    assert self.model is not None, "Network is not configured"
+    self.model.save(path)
+
   def clone(self):
     copy = FeedForwardNetwork(self.hidden_layers)
     copy.model = tf.keras.models.clone_model(self.model)
