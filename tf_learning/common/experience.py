@@ -17,4 +17,4 @@ class ExperienceBuffer:
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
         observations, actions, rewards, dones, next_observations = zip(*[self.buffer[idx] for idx in indices])
         return np.array(observations), np.array(actions), np.array(rewards, dtype=np.float32), \
-               np.array(dones, dtype=np.bool), np.array(next_observations)
+               np.array(dones, dtype=np.bool_), np.array(next_observations)

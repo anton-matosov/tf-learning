@@ -50,12 +50,17 @@ class NetworkAgentAllInOne(AbstractAgent):
     self.network = network
     self.network.configure(self.observation_space, self.action_space, tf.nn.relu)
 
+    self.last_observation = None
+
   @property
   def epsilon(self):
     current_step = self.teacher.train_step_counter.numpy()
     return self.epsilon_space[np.minimum(current_step, self.epsilon_last_step - 1)]
 
   def select_action(self, observation):
+    assert type(observation) == np.ndarray, "Observation is not a numpy array"
+    if self.last_observation is not None:
+      assert len(self.last_observation) == len(observation), "Observation shape changed"
     self.last_observation = observation
 
     explore = self.teacher.force_explore() or np.random.random() < self.epsilon

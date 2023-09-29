@@ -24,7 +24,7 @@ engine = Engine(
   max_total_steps = 20000,
   max_episodes = 3000,
   max_steps_per_episode = 200,
-  env_name = 'CartPole-v0',
+  env_name = 'CartPole-v1',
   # env_name = 'FrozenLake-v0',
 )
 

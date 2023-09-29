@@ -15,7 +15,7 @@ class Engine:
     for i_episode in range(self.max_episodes):
       self.total_reward = 0
       agent.episode_started()
-      observation = self.env.reset()
+      observation, info = self.env.reset()
       for t in range(self.max_steps_per_episode):
           self.render_env()
 
@@ -41,7 +41,8 @@ class Engine:
     # reward - amount of reward achieved by the previous action
     # done - whether it’s time to reset the environment again
     # info - diagnostic information useful for debugging
-    observation, reward, done, info = self.env.step(action)
+    observation, reward, terminated, truncated, info = self.env.step(action)
+    done = terminated or truncated
 
     agent.register_reward(observation, reward, done)
     self.total_reward += reward
@@ -50,4 +51,4 @@ class Engine:
 
   def render_env(self):
     if self.render:
-      env.render()
+      self.env.render()
