@@ -2,13 +2,14 @@ import gymnasium as gym
 
 class Engine:
   def __init__(self, env_name, max_total_steps = 20000,
-      max_episodes = 120,
-      max_steps_per_episode = 200):
-    self.env = gym.make(env_name)
+      max_episodes = 3000,
+      max_steps_per_episode = 200,
+      render_mode=None):
+    self.env = gym.make(env_name, render_mode=render_mode)
     self.max_total_steps = max_total_steps
     self.max_episodes = max_episodes
     self.max_steps_per_episode = max_steps_per_episode
-    self.render = False
+    self.render = render_mode is not None
 
   def rollout(self, agent):
     global_step = 0
