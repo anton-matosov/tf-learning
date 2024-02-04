@@ -26,8 +26,8 @@ class DqnTeacher:
     # self.optimizer = tf.keras.optimizers.RMSprop(LEARNING_RATE)
     self.train_step_counter = tf.Variable(0, trainable=False, name='train_step_counter', dtype=tf.int64)
 
-    self._summarize_grads_and_vars = True
-    self._debug_summaries = True
+    self._summarize_grads_and_vars = False
+    self._debug_summaries = False
 
   def record_experience(self, experience):
     self.buffer.append(experience)
@@ -73,7 +73,7 @@ class DqnTeacher:
 
     next_q_values = tgt_net.forward_pass(next_states)
     next_state_values = tf.math.reduce_max(next_q_values, axis=1)
-    
+
     valid_mask = tf.cast(~dones, tf.float32)
 
     expected_state_action_values = tf.stop_gradient(rewards + valid_mask * GAMMA * next_state_values)

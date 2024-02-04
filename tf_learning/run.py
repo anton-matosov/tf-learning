@@ -14,6 +14,8 @@ from networks import FeedForwardNetwork
 
 from tf_learning.algorithms import DqnTeacher
 
+import time
+
 summaries_dir = "runs"
 
 date_mark = datetime.now().strftime("%Y-%m-%d--%H-%M-%S.%f")
@@ -23,7 +25,7 @@ writer.set_as_default()
 
 engine = Engine(
   max_total_steps = 20000,
-  max_episodes = 3000,
+  max_episodes = 100,
   max_steps_per_episode = 200,
   env_name = 'CartPole-v1',
   # env_name = 'FrozenLake-v0',
@@ -36,11 +38,14 @@ network.summary()
 
 # agent = RandomAgent(engine.env)
 
+start = time.perf_counter_ns()
 try:
   print("Training started. Press Ctrl+C to interrupt")
-
   engine.rollout(dqnAgent)
 except KeyboardInterrupt:
   print("Training interrupted")
+
+end = time.perf_counter_ns()
+print("Training finished in {} seconds".format((end - start) / 1e9))
 
 network.save(path.join(run_dir, 'model.h5'))
