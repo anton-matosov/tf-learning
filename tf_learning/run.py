@@ -20,6 +20,7 @@ gpus = tf.config.list_physical_devices('GPU')
 print("GPUs:", gpus)
 try:
   tf.config.experimental.set_memory_growth(gpus[0], True) # Use only as much GPU memory as needed
+  # There is no need to configure anything else here, Tensorflow will use all GPUs available by default
 except:
   # Invalid device or cannot modify virtual devices once initialized.
   pass
