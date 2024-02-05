@@ -16,6 +16,14 @@ from tf_learning.algorithms import DqnTeacher
 
 import time
 
+gpus = tf.config.list_physical_devices('GPU')
+print("GPUs:", gpus)
+try:
+  tf.config.experimental.set_memory_growth(gpus[0], True) # Use only as much GPU memory as needed
+except:
+  # Invalid device or cannot modify virtual devices once initialized.
+  pass
+
 summaries_dir = "runs"
 
 date_mark = datetime.now().strftime("%Y-%m-%d--%H-%M-%S.%f")
