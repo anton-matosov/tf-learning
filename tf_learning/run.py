@@ -34,16 +34,18 @@ writer.set_as_default()
 
 engine = Engine(
   max_total_steps = 20000,
-  max_episodes = 100,
+  max_episodes = 120,
   max_steps_per_episode = 200,
   env_name = 'CartPole-v1',
   # env_name = 'FrozenLake-v0',
 )
 
-network = FeedForwardNetwork([100])
+# Define a tensor and place it on GPU 0
+with tf.device('/gpu:0'):
+  network = FeedForwardNetwork([100])
 
-dqnAgent = NetworkAgentAllInOne(engine.env, network, DqnTeacher())
-network.summary()
+  dqnAgent = NetworkAgentAllInOne(engine.env, network, DqnTeacher())
+  network.summary()
 
 # agent = RandomAgent(engine.env)
 
