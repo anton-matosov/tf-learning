@@ -32,13 +32,15 @@ run_dir = path.join(summaries_dir, 'dqn', date_mark)
 writer = tf.compat.v2.summary.create_file_writer(run_dir)
 writer.set_as_default()
 
-engine = Engine(
-  max_total_steps = 20000,
-  max_episodes = 120,
-  max_steps_per_episode = 200,
-  env_name = 'CartPole-v1',
-  # env_name = 'FrozenLake-v0',
-)
+engine_params = {
+  "max_total_steps": 20000,
+  "max_episodes": 120,
+  "max_steps_per_episode": 200,
+  "env_name": 'CartPole-v1',
+            'render_mode': 'human',
+  # "env_name": 'FrozenLake-v0',
+}
+engine = Engine(**engine_params)
 
 # Define a tensor and place it on GPU 0
 with tf.device('/gpu:0'):
@@ -60,3 +62,14 @@ end = time.perf_counter_ns()
 print("Training finished in {} seconds".format((end - start) / 1e9))
 
 network.save(path.join(run_dir, 'model.h5'))
+try:
+  print("Demo started. Press Ctrl+C to interrupt")
+  # python decompose engine_params
+  params = {**engine_params,
+            'render_mode': 'human',
+            'max_episodes': 3}
+  demo_engine = Engine(**params)
+  demo_engine.rollout(dqnAgent)
+except KeyboardInterrupt:
+  print("Demo interrupted")
+
